@@ -50,6 +50,11 @@ kramdown:
       line_numbers: true
       start_line: 1
 
+scholar:
+  style: modern-language-association
+  bibliography: "**/*.bib{,tex}"
+  source: "./_posts"
+
 sass:
   style: :compressed
 
