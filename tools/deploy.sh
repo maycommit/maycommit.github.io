@@ -52,6 +52,7 @@ build() {
   fi
 
   # build
+  pip install jupyter nbconvert
   ls
   JEKYLL_ENV=production bundle exec jekyll b --trace -d  "$SITE_DIR$_baseurl" --config "$_config"
   ls
