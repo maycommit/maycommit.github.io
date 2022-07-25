@@ -21,7 +21,7 @@ timezone:
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: Chirpy                          # the main title
+title: maycommit                          # the main title
 
 tagline: A text-focused Jekyll theme   # it will display as the sub-title
 
@@ -35,7 +35,7 @@ plugins:
   - jekyll-jupyter-notebook
 
 github:
-  username: github_username             # change to your github username
+  username: maycommit             # change to your github username
 
 twitter:
   username: twitter_username            # change to your twitter username
