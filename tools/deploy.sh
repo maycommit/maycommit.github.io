@@ -65,7 +65,6 @@ test() {
 
 resume_site_dir() {
   pip install jupyter nbconvert
-  cp -R _notebooks "$SITE_DIR"/notebooks
   if [[ -n $_baseurl ]]; then
     # Move the site file to the regular directory '_site'
     mv "$SITE_DIR$_baseurl" "${SITE_DIR}-rename"
