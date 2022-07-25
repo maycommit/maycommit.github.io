@@ -8,5 +8,5 @@ title: Blog title
 Here is a Jupyter Notebook on Blog using a string literal:
 
 {::nomarkdown}
-{% jupyter_notebook "decision_tree.ipynb" %}
+{% jupyter_notebook "/notebooks/decision_tree.ipynb" %}
 {:/nomarkdown}
