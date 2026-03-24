@@ -76,7 +76,7 @@
           const key = kvMatch[1];
           const val = kvMatch[2].trim();
           if (key === 'xDomain' || key === 'yDomain') {
-            const nums = val.replace(/[\[\]]/g, '').split(',').map(Number);
+            const nums = val.replace(/[\[\]]/g, '').split(',').map(s => Function('"use strict"; return (' + s.replace(/PI/g, 'Math.PI').replace(/E(?!\w)/g, 'Math.E') + ')')());
             opts[key] = nums;
           } else if (key === 'title') {
             opts.title = val;
