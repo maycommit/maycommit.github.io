@@ -1,4 +1,35 @@
----
-layout: home
-# Index page
----
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>maycommit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="/">maycommit</a></h1>
+    <p>blog</p>
+  </header>
+  <main>
+    <ul class="post-list" id="posts"></ul>
+  </main>
+  <footer>&copy; maycommit</footer>
+
+  <script>
+    fetch('posts.json')
+      .then(r => r.json())
+      .then(posts => {
+        const list = document.getElementById('posts');
+        posts.forEach(p => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="date">${p.date}</span><a href="post.html?p=${encodeURIComponent(p.file)}">${p.title}</a>`;
+          list.appendChild(li);
+        });
+      })
+      .catch(() => {
+        document.getElementById('posts').innerHTML = '<li>Nenhum post ainda.</li>';
+      });
+  </script>
+</body>
+</html>
