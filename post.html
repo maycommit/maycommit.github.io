@@ -73,14 +73,19 @@
     if (file) {
       fetch('posts/' + file)
         .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+        .catch(() => {
+          document.getElementById('content').textContent = 'Post não encontrado.';
+          return null;
+        })
         .then(md => {
+          if (!md) return;
           const { meta, body } = parseFrontMatter(md);
           if (meta.title) document.title = meta.title + ' — maycommit';
           document.getElementById('meta').textContent = [meta.date, meta.title].filter(Boolean).join(' · ');
           document.getElementById('content').innerHTML = marked.parse(body);
 
           // Render mermaid diagrams
-          mermaid.run({ querySelector: '.mermaid' });
+          mermaid.run({ querySelector: '.mermaid' }).catch(() => {});
 
           // Render KaTeX math
           renderMathInElement(document.getElementById('content'), {
@@ -92,9 +97,6 @@
             ],
             throwOnError: false
           });
-        })
-        .catch(() => {
-          document.getElementById('content').textContent = 'Post não encontrado.';
         });
     }
   </script>
