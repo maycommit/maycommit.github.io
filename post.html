@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,6 +25,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/languages/yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/languages/json.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11/languages/rust.min.js"></script>
+  <!-- Function Plot (math graphing) -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/function-plot@1/dist/function-plot.js"></script>
 </head>
 <body>
   <header>
@@ -33,10 +36,10 @@
   <main>
     <article>
       <div class="post-meta" id="meta"></div>
-      <div class="post-content" id="content">Carregando...</div>
+      <div class="post-content" id="content">Loading...</div>
     </article>
   </main>
-  <footer><a href="/">&larr; voltar</a></footer>
+  <footer><a href="/">&larr; back</a></footer>
 
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
@@ -47,6 +50,10 @@
           if (lang === 'mermaid') {
             return `<div class="mermaid">${text}</div>`;
           }
+          if (lang === 'functionplot') {
+            const id = 'plot-' + Math.random().toString(36).slice(2, 9);
+            return `<div class="function-plot" id="${id}" data-plot="${text.replace(/"/g, '&quot;')}"></div>`;
+          }
           if (lang && hljs.getLanguage(lang)) {
             const highlighted = hljs.highlight(text, { language: lang }).value;
             return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
@@ -56,6 +63,56 @@
         }
       }
     });
+
+    function parsePlotConfig(text) {
+      const lines = text.trim().split('\n');
+      const fns = [];
+      const opts = {};
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const kvMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
+        if (kvMatch) {
+          const key = kvMatch[1];
+          const val = kvMatch[2].trim();
+          if (key === 'xDomain' || key === 'yDomain') {
+            const nums = val.replace(/[\[\]]/g, '').split(',').map(Number);
+            opts[key] = nums;
+          } else if (key === 'title') {
+            opts.title = val;
+          } else {
+            // treat as function definition: fn = expression
+            fns.push({ fn: val, color: undefined });
+          }
+        } else {
+          // bare line = function expression
+          fns.push({ fn: trimmed });
+        }
+      }
+      return { fns, opts };
+    }
+
+    function renderPlots() {
+      document.querySelectorAll('.function-plot').forEach(el => {
+        const raw = el.getAttribute('data-plot');
+        if (!raw) return;
+        const { fns, opts } = parsePlotConfig(raw);
+        try {
+          functionPlot({
+            target: '#' + el.id,
+            width: Math.min(el.parentElement.offsetWidth, 700),
+            height: 400,
+            xAxis: opts.xDomain ? { domain: opts.xDomain } : undefined,
+            yAxis: opts.yDomain ? { domain: opts.yDomain } : undefined,
+            title: opts.title,
+            grid: true,
+            data: fns.map(f => ({ fn: f.fn, graphType: 'polyline' }))
+          });
+        } catch (e) {
+          el.textContent = 'Plot error: ' + e.message;
+        }
+      });
+    }
 
     function parseFrontMatter(md) {
       const match = md.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -73,7 +130,7 @@
       fetch('posts/' + file)
         .then(r => { if (!r.ok) throw new Error(); return r.text(); })
         .catch(() => {
-          document.getElementById('content').textContent = 'Post não encontrado.';
+          document.getElementById('content').textContent = 'Post not found.';
           return null;
         })
         .then(md => {
@@ -85,6 +142,9 @@
 
           // Render mermaid diagrams
           mermaid.run({ querySelector: '.mermaid' }).catch(() => {});
+
+          // Render function plots
+          renderPlots();
 
           // Render KaTeX math
           renderMathInElement(document.getElementById('content'), {
