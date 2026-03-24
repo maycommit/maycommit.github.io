@@ -22,13 +22,19 @@ jobs:
       - name: Generate posts index
         run: python3 build.py
 
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp index.html post.html style.css posts.json .nojekyll _site/
+          cp -r posts _site/
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
   deploy:
     needs: build
