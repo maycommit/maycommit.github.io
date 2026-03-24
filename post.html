@@ -41,22 +41,21 @@
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
 
-    const renderer = new marked.Renderer();
-
-    // Intercept code blocks for mermaid
-    const originalCode = renderer.code.bind(renderer);
-    renderer.code = function({ text, lang }) {
-      if (lang === 'mermaid') {
-        return `<div class="mermaid">${text}</div>`;
+    marked.use({
+      renderer: {
+        code({ text, lang }) {
+          if (lang === 'mermaid') {
+            return `<div class="mermaid">${text}</div>`;
+          }
+          if (lang && hljs.getLanguage(lang)) {
+            const highlighted = hljs.highlight(text, { language: lang }).value;
+            return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+          }
+          const escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<pre><code>${escaped}</code></pre>`;
+        }
       }
-      if (lang && hljs.getLanguage(lang)) {
-        const highlighted = hljs.highlight(text, { language: lang }).value;
-        return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
-      }
-      return `<pre><code>${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
-    };
-
-    marked.setOptions({ renderer });
+    });
 
     function parseFrontMatter(md) {
       const match = md.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
